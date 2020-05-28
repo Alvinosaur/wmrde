@@ -98,7 +98,7 @@ mdl.act_p = [250 0 Inf]';
 
 %FOR BOTH
 %set function handles
-mdl.controller_fh = @ackermanController;
+mdl.controller_fh = @ackermanControllerCustom;
 
 if do_suspension
     mdl.hjc_fh = @recbotConstraints;

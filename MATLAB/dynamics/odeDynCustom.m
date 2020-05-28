@@ -1,7 +1,6 @@
-function [ydot,out] = odeDyn(time,y,mdl,surfaces,contacts,dt,pathno)
+function [ydot,out] = odeDynCustom(action,y,mdl,surfaces,contacts,dt)
 %ordinary differential equation for kinematic simulation
 %INPUTS
-%time:      scalar
 %y:         [state; qvel; interr]
 %mdl:       WmrModel object
 %surfaces:  cell array of surface objects for terrain
@@ -30,7 +29,6 @@ isorient = stateIs(ns);
 
 u = ControllerIO();
 
-
 %split up y vector
 [state,qvel,u.interr]=odeDynDecat(y,nf,na);
 
@@ -42,11 +40,7 @@ contacts = updateModelContactGeom(mdl, surfaces, HT_world, 0, contacts);
 
 %get control inputs
 disp(mdl.controller_fh);
-if isempty(pathno)
-    u.cmd = feval(mdl.controller_fh,mdl,time,state);
-else
-    u.cmd = feval(mdl.controller_fh,mdl,time,state,pathno);
-end
+u.cmd = feval(mdl.controller_fh,mdl,state,action);
 
 %compute acceleration
 [qacc,u,fdout] = forwardDyn(mdl, state, qvel, u, HT_parent, HT_world, contacts, dt);

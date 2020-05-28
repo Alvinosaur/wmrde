@@ -8,7 +8,7 @@ function contacts = updateWheelContactGeom(surfaces, HT_wheel_to_world, radii)
 %OUTPUT
 %contacts               1 x nw array of WheelContactGeom objects
 
-
+% nw = number of wheels = 4 for recbot
 nw = length(radii);
 
 
@@ -60,6 +60,7 @@ contacts(1:nw) = WheelContactGeom();
 for wno = 1:nw
     contacts(wno).dz = dz(wno);
     contacts(wno).angle = contact_angles(wno);
+    contacts(wno).cp_world = cp_world(:,wno);
     N = HT_wheel_to_world(1:3,1:3,wno)' * N_world(:,wno); %in wheel coords
     contacts(wno).HT_wheel = HTContactToWheel(cp(:,wno),N);
     contacts(wno).HT_world = HT_wheel_to_world(:,:,wno) * contacts(wno).HT_wheel;

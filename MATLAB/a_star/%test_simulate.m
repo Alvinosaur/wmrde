@@ -28,16 +28,7 @@ nw = mdl.nw;
 na = mdl.na;
 
 surfs = feval(opts.terrain_fh);
-vals = linspace(0,5,1);
-disp(surfs{1}.Z(vals, vals));
-
-disp(surfs{1}.DZDX);
-% disp(surfs{1}.X);
-% surfs{1}.X and .Y: 201 x 101 grid
-% example: size(ndgrid(linspace(0,5),linspace(0,5))) = 100 x 100
-% 100x100 grid
-% disp(surfs{1}.X);   
-% disp(surfs.
+surface = surfs{1};
 
 %init contact geometry
 if mdl.nw > 0
@@ -85,7 +76,7 @@ if opts.animate
     
 end
 
-do_pause = true;
+do_pause = false;
 
 %simulate
 
@@ -95,80 +86,30 @@ end
 tic
 
 
-if opts.use_builtin_solver
-    %use built-in MATLAB ode solver
-    mdl.use_constraints = false;
-%     opts.abs_tol = 1e-5;
-%     opts.rel_tol = 1e-03;
-    
 
-    options = odeset('AbsTol',opts.abs_tol,'RelTol',opts.rel_tol,'MaxStep',.20);
+for i = 2:nsteps
+    y=[state; qvel; interr];
+    [ydot,out] = odeDyn(time,y,mdl,surfs,contacts,dt);
+    y = y + ydot*dt;
+    [state,qvel,interr]=odeDynDecat(y,nf,na);
+    time = time + dt;
 
-    tspan = [0 (nsteps-1)*dt];
-    if opts.dyn
-        y0 = [state; qvel; interr];
-        addlin = {mdl,surfs,dt};
-        [time,yout] = feval(opts.solver,@odeDyn,tspan,y0,options,addlin{:});
-
-        [STATE,QVEL,~] = odeDynDecat(yout',nf,na);
-
-        STATE = STATE';
-        QVEL = QVEL';
-
-    else
-        addlin={mdl,surfaces};
-        [time,yout] = feval(opts.solver,@odeKin,tspan,state,options,addlin{:});
-
-        STATE = yout;
-        [~,QVEL] = diffState(time,STATE,isorient);
+    if opts.log
+        set_time(dlog,i,time);
+        set_state(dlog,i,state);
+        set_qvel(dlog,i,qvel);
+        %see SimulationLog for more to log
     end
 
-    nsteps = length(time);
+    if opts.animate
+        updateAnimation(ainm, out.HT_parent, out.contacts);
 
-    dlog = SimulationLog(nsteps,nf,np,na,opts.dyn); %number of steps changed
-
-    %data logging
-    set_time(dlog,1:nsteps,time);
-    set_state(dlog,1:nsteps,STATE);
-    set_qvel(dlog,1:nsteps,QVEL);
-    
-    state(:) = dlog.state(end,:);
-else
-    %use force-balance optimization technique
-    for i = 2:nsteps
-
-        if opts.dyn
-            y=[state; qvel; interr];
-            [ydot,out] = odeDyn(time,y,mdl,surfs,contacts,dt);
-            y = y + ydot*dt;
-
-%             [y,out]=RK4step(@odeDyn,dt,time,y,{mdl,surfs,contacts,dt}); %DEBUGGING
-            
-            [state,qvel,interr]=odeDynDecat(y,nf,na);
-        else
-            [statedot,out] = odeKin(time,state,mdl,surfs,contacts);
-            state = state + statedot*dt;
+        if do_pause
+            pause
+            do_pause = false;
         end
-        time = time + dt;
-
-
-        if opts.log
-            set_time(dlog,i,time);
-            set_state(dlog,i,state);
-            set_qvel(dlog,i,qvel);
-            %see SimulationLog for more to log
-        end
-
-        if opts.animate
-            updateAnimation(anim, out.HT_parent, out.contacts);
-
-            if do_pause
-                pause
-                do_pause = false;
-            end
-        end
-
     end
+
 end
 
 comp_time = toc

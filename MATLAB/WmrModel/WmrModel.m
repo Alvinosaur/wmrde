@@ -20,7 +20,12 @@ classdef WmrModel < handle %handle class to avoid unnecessary copying in functio
     end
     
     properties (GetAccess = 'public', SetAccess = 'public')
-        
+        % length, width, height of vehicle
+        Lb
+        Wb
+        Hb
+        % Wheel width
+        Ww
         
         %TODO, make these private?
         description     %string

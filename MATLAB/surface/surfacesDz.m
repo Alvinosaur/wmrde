@@ -10,6 +10,7 @@ function [dz,surfidx] = surfacesDz(surfaces,pts)
 n = size(pts,2);
 dz = Inf*ones(1,n);
 surfidx = NaN(1,n);
+% disp(size(pts));
 
 for i = 1:length(surfaces)
     dz_ = surfaceDz(surfaces{i},pts);

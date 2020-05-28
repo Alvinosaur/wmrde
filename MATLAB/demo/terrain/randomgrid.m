@@ -39,6 +39,7 @@ cy = 0;
 
 Z = randommat(lx,ly,ppm,RmsHeight,CorrLength);
 
+% GridSurf(xmin,xmax,nx,ymin,ymax,ny,Z)
 surface = GridSurf(...
     cx-lx/2,cx+lx/2,size(Z,1),...
     cy-ly/2,cy+ly/2,size(Z,2),Z);

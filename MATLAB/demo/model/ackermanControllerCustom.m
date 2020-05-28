@@ -1,4 +1,4 @@
-function [u,cmd] = ackermanController(mdl, time, state)
+function [u,cmd] = ackermanControllerCustom(mdl, state, action)
 %controller for rear wheel drive Ackerman steered vehicle (Gator)
 %INPUTS
 %OUTPUTS
@@ -32,20 +32,8 @@ end
 
 radii = [mdl.frames(wfi).rad];
 
-if time < 1
-    speed = .5;
-    turnrad = Inf;
-elseif time >= 1 && time < 5
-    speed = 1;
-    turnrad = Inf;
-elseif time >= 5 && time < 10
-    speed = 1;
-    turnrad = -5;
-else
-    speed = 1;
-    turnrad = 5;
-end
-
+speed = action(1);
+turnrad = action(2);
 
 if isinf(turnrad)
     omega = 0;
@@ -81,7 +69,5 @@ if nargout > 1
     cmd(4)=speed; %vx
     cmd(3)=omega; %wz
     cmd(avi)=u;
-    disp("qvel:");
-    disp(cmd);
 end
 

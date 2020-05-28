@@ -4,6 +4,11 @@ function [coord, coord_idx, color, color_idx, normal, normal_idx] = parseVrml(fi
 %used to generate patch object
 
 fid = fopen(filename,'r');
+if fid == -1
+ disp(filename);
+ error('Cannot open file:');
+
+end
 
 tmp = ' ';
 
