@@ -1,46 +1,103 @@
-#include <wmrde/test.h>
+#include "wmrde/test.h"
 //#include <wmrde/ode/test_ode.h>
-
 //int main()
 int main(int argc, char *argv[]) //use this for console output
 {
-	//in test.h
-	//test_common();
+	//options
+	bool do_dyn = true; //do dynamic simulation, else kinematic
+	bool ideal_actuators = true;
+	bool do_anim = true; //do animation
 
-	//test_linalg3();
-	//test_transform();
-	//test_spatial();
-	//test_matrix();
+	const Real dt = .04;
+	const int nsteps = (int) floor(10.0/dt);
+	Real time = 0;
 
-	//test_surface();
-	//test_updateWheelContactGeom();
-	//test_updateTrackContactGeom();
+	//for allocation
+	const int MAXNS = NUMSTATE(WmrModel::MAXNF);
+	const int MAXNV = NUMQVEL(WmrModel::MAXNF);
+	const int MAXNY = MAXNS+MAXNV+WmrModel::MAXNA; //for dynamic sim
 
-	//test_stateToHT();
-	//test_qvelToQdot();
+	//make WmrModel object
+	WmrModel mdl;
+	Real state[MAXNS];
+	Real qvel[MAXNV]; //for dynamic sim
 
-	//test_wheelJacobians();
-	//test_trackJacobians();
-	//test_forwardVelKin();
-	//test_initTerrainContact();
+	//uncomment one of the following:
+	//for animation, must also uncomment the corresponding scene function below
+//	zoe(mdl,state,qvel);
+	rocky(mdl,state,qvel);
+//	talon(mdl,state,qvel);
 
-	//test_subtreeInertias();
-	//test_jointSpaceInertia();
-	//test_jointSpaceBiasForce();
-	//test_forwardDyn();
+	//also uncomment the corresponding scene function below!
+	//initialize wheel-ground contact model
+	mdl.wheelGroundContactModel(0, mdl.wgc_p, 0, 0, 0, //inputs
+		0, 0); //outputs
 
-	test_simulate();
+	if (ideal_actuators)
+		mdl.actuatorModel=0;
 
+	//get from WmrModel
+	const int nf = mdl.get_nf();
+	const int nw = mdl.get_nw();
+	const int nt = mdl.get_nt();
+	const int ns = NUMSTATE(nf); //number of states
+	//for dynamic sim
+	const int nv = NUMQVEL(nf); //size of joint space vel
+	const int na = mdl.get_na(); 
+	int ny;
 
-	//in test_ode.h
+	//terrain
+	SurfaceVector surfs;
+	//flat(surfs);
+	//ramp(surfs); //must also uncomment flat
 
-	//test_convertToWmrModelODE();
-//	test_simulate_ODE();
-//	test_benchmark();
+	grid(surfs, ResourceDir() + std::string("gridsurfdata.txt") );
 
-	
-	std::cin.get();
+	//init contact geometry
+	WheelContactGeom wcontacts[WmrModel::MAXNW];
+	TrackContactGeom tcontacts[WmrModel::MAXNW];
+	ContactGeom* contacts =0; //base class
+
+	contacts = static_cast<ContactGeom*>(wcontacts);
+	// } else if (nt > 0) {
+	// 	sub_initTrackContactGeom(mdl, tcontacts);
+	// 	contacts = static_cast<ContactGeom*>(tcontacts);
+	// }
+	initTerrainContact(mdl, surfs, contacts, state); //DEBUGGING
+	//allocate
+	Real y[MAXNY];
+	Real ydot[MAXNY];
+
+	//init y
+	if (do_dyn) { //dynamic sim
+		copyVec(ns,state,y);
+		copyVec(nv,qvel,y+ns);
+		setVec(na,0.0,y+ns+nv); //interr
+		ny = ns + nv + na;
+	} else {
+		copyVec(ns,state,y);
+		ny = ns;
+	}
+	//backup
+	Real y0[MAXNY];
+	copyVec(ny,y,y0); 
+
+	//allocate
+	HomogeneousTransform HT_parent[WmrModel::MAXNF];
+
+	std::cout << "state(" << time << ")=\n"; printMatReal(ns,1,y,-1,-1); std::cout << std::endl;
+
+	for (int i=0; i<nsteps; i++) {
+
+		if (do_dyn) {
+			odeDyn(time, y, mdl, surfs, contacts, dt, ydot, HT_parent);
+		} else {
+			odeKin(time, y, mdl, surfs, contacts, ydot, HT_parent);
+		}
+		addmVec(ny,ydot,dt,y);
+		time += dt;
+
+	}
+
+	std::cout << "state(" << time << ")=\n"; printMatReal(ns,1,y,-1,-1); std::cout << std::endl;
 }
-
-
-

@@ -36,7 +36,7 @@ int surfacesDz(const SurfaceVector& surfaces, const Vec3 pt, Real& dz, Vec3 norm
 	if (normal != 0)
 		ptr = normal_;
 	int loc;
-	int surfidx;
+	int surfidx = 0;
 
 	
 	dz = REALMAX;

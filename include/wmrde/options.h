@@ -10,7 +10,7 @@
 #define WMRSIM_USE_QUATERNION 0 //else use Euler angles
 #define WMRSIM_DOUBLE_PRECISION 1 //else single (float) precision
 //single precision is slower?! lots of "trunction, possible loss of data" warnings
-#define WMRSIM_ENABLE_ANIMATION 1 //include WmrAnimation, OGRE dependencies
+// #define WMRSIM_ENABLE_ANIMATION 1 //include WmrAnimation, OGRE dependencies
 
 inline std::string ResourceDir() {
 	//return std::string("C:/Users/nseegmil.NREC-014635/Documents/Thesis/src/resource/");
