@@ -1,4 +1,4 @@
-function opts = simopts()
+function opts = custom_simopts()
 
 opts.dt = .05; %time step size
 opts.nsteps = 400; %number of time steps

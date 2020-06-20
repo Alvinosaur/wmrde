@@ -1,3 +1,5 @@
 *.fig
 *.mat
 /build
+*.m~
+*.DS_Store

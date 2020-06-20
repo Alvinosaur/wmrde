@@ -1,6 +1,6 @@
 %test_simulate.m
 
-clear_all
+clear all
 close all
 clc
 
@@ -27,13 +27,22 @@ nf = mdl.nf;
 nw = mdl.nw;
 na = mdl.na;
 
-surfs = feval(opts.terrain_fh);
-vals = linspace(0,5,1);
-disp(surfs{1}.Z(vals, vals));
+data = load("/Users/Alvin/Documents/Code/safety_reachability_AV_research/assured_autonomy_car/search_planning_algos/terrains/test1_terrain.mat");
+xmin = double(data.xbounds(1)); xmax = double(data.xbounds(2));
+ymin = double(data.ybounds(1)); ymax = double(data.ybounds(2));
+nx = double(data.nx); ny = double(data.ny);
+Z = data.map;
+surface = GridSurf(xmin,xmax,nx,ymin,ymax,ny,Z);
+surfs = {surface};
 
-disp(surfs{1}.DZDX);
+
+% surfs = feval(opts.terrain_fh);
+% vals = linspace(0,5,1);
+% disp(surfs{1}.Z(vals, vals));
+
+% disp(surfs{1}.DZDX);
 % disp(surfs{1}.X);
-% surfs{1}.X and .Y: 201 x 101 grid
+% surfs{1}.X and .Y: = 201 x 101 grid
 % example: size(ndgrid(linspace(0,5),linspace(0,5))) = 100 x 100
 % 100x100 grid
 % disp(surfs{1}.X);   
@@ -53,7 +62,7 @@ if opts.init_in_contact
     state = initTerrainContact(mdl,surfs,contacts,state);
 end
 
-state0 = state
+state0 = state;
 disp(state0);
 
 interr = zeros(na,1);
@@ -98,8 +107,8 @@ tic
 if opts.use_builtin_solver
     %use built-in MATLAB ode solver
     mdl.use_constraints = false;
-%     opts.abs_tol = 1e-5;
-%     opts.rel_tol = 1e-03;
+    opts.abs_tol = 1e-5;
+    opts.rel_tol = 1e-03;
     
 
     options = odeset('AbsTol',opts.abs_tol,'RelTol',opts.rel_tol,'MaxStep',.20);
@@ -134,7 +143,7 @@ if opts.use_builtin_solver
     
     state(:) = dlog.state(end,:);
 else
-    %use force-balance optimization technique
+    %use force-balance optimizaftion technique
     for i = 2:nsteps
 
         if opts.dyn

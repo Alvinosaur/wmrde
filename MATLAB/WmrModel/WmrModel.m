@@ -24,6 +24,7 @@ classdef WmrModel < handle %handle class to avoid unnecessary copying in functio
         Lb
         Wb
         Hb
+        min_turnrad
         % Wheel width
         Ww
         

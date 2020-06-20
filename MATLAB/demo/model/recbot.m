@@ -34,6 +34,7 @@ mdl.Ww = Ww;
 mdl.Lb=L;
 mdl.Wb=min(B);
 mdl.Hb=1.130-max(rad);
+mdl.min_turnrad = 7.3;
 
 %wheels:
 zoff=rad(1)-rad(2)-.05; %difference between front/rear wheel radius, suspension deflection
@@ -150,6 +151,7 @@ if nargout > 3
             %Body
             i=1;
             disp(cdir);
+            cdir = '/Users/Alvin/Documents/Code/safety_reachability_AV_research/assured_autonomy_car/wmrde/CAD/RecBot/';
             makeVrmlHgt(anim.h_hgt(i),fullfile(cdir,'RecBotBody.wrl'),[],0,draw_edges,fix_lighting,alpha)
 
             %wheels
